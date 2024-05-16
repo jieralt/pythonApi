@@ -1,4 +1,6 @@
 from app import create_app
+import os
+os.environ['FLASK_APP'] = 'run.py'
 
 app = create_app()
 
