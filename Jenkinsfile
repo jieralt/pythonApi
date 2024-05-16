@@ -24,6 +24,7 @@ pipeline {
         stage('Run Flask App') {
             steps {
                 script {
+                    // 启动 Flask 应用程序
                     sh '. ${VENV}/bin/activate && supervisord -c ${SUPERVISORD_CONF}'
                 }
             }
