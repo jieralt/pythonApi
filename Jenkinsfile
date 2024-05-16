@@ -26,8 +26,8 @@ pipeline {
         stage('Run Flask App') {
             steps {
                 script {
-                    // 运行 Flask 应用
-                    sh '. ${VENV}/bin/activate && flask run'
+                    // 运行 Flask 应用，使用 python run.py
+                    sh '. ${VENV}/bin/activate && python run.py'
                 }
             }
         }
