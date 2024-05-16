@@ -25,3 +25,13 @@ supervisorctl -c supervisord.conf status
 
 # 关闭 supervisord
 supervisorctl -c supervisord.conf shutdown
+
+
+# 赋予目录和文件足够的权限
+sudo chown -R root:root /home/www/.jenkins/workspace/pythonApi
+sudo chmod -R 755 /home/www/.jenkins/workspace/pythonApi
+
+# 确保 supervisord 和相关日志文件有正确的权限
+sudo touch /tmp/supervisord.log /var/log/flaskapp.err.log /var/log/flaskapp.out.log
+sudo chown root:root /tmp/supervisord.log /var/log/flaskapp.err.log /var/log/flaskapp.out.log
+sudo chmod 644 /tmp/supervisord.log /var/log/flaskapp.err.log /var/log/flaskapp.out.log
