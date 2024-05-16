@@ -17,14 +17,13 @@ pipeline {
                 script {
                     sh 'python3 -m venv ${VENV}'
                     sh '. ${VENV}/bin/activate && pip install -r requirements.txt'
-                    // sh 'pip install supervisor'
+                    sh '. ${VENV}/bin/activate && pip install supervisor'
                 }
             }
         }
         stage('Run Flask App') {
             steps {
                 script {
-                    // 启动 Flask 应用程序
                     sh '. ${VENV}/bin/activate && supervisord -c ${SUPERVISORD_CONF}'
                 }
             }
@@ -34,8 +33,12 @@ pipeline {
     post {
         always {
             script {
-                // 停止 Flask 应用程序
-                sh '. ${VENV}/bin/activate && supervisorctl -c ${SUPERVISORD_CONF} shutdown'
+                // 输出 supervisord 日志文件以帮助调试
+                sh 'cat /tmp/supervisord.log || true'
+                sh 'cat /var/log/flaskapp.err.log || true'
+                sh 'cat /var/log/flaskapp.out.log || true'
+                // 尝试停止 Flask 应用程序
+                sh '. ${VENV}/bin/activate && supervisorctl -c ${SUPERVISORD_CONF} shutdown || true'
                 cleanWs()
             }
         }

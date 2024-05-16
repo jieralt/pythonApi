@@ -14,3 +14,14 @@ git credential-cache exit
 git config --global --unset credential.helper
 git remote set-url origin https://jieralt@github.com/jieralt/pythonApi.git
 git push origin main
+
+
+linux
+# 启动 supervisord
+supervisord -c supervisord.conf
+
+# 检查状态
+supervisorctl -c supervisord.conf status
+
+# 关闭 supervisord
+supervisorctl -c supervisord.conf shutdown
