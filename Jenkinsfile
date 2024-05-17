@@ -43,9 +43,9 @@ pipeline {
             steps {
                 sh '''
                 source $VENV_PATH/bin/activate
-                cp -r . $PERSISTENT_PATH
+                sudo cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
-                nohup python run.py > flaskapp.log 2>&1 &
+                sudo nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
                 '''
