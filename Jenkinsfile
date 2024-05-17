@@ -16,8 +16,7 @@ pipeline {
         stage('Clean Target Directory') {
             steps {
                 sh '''
-                echo '' | sudo -S rm -rf $PERSISTENT_PATH
-                echo '' | sudo -S mkdir -p $PERSISTENT_PATH
+                echo '' | sudo -S find $PERSISTENT_PATH -mindepth 1 ! -regex "^$PERSISTENT_PATH/$VENV_PATH.*" -delete
                 '''
             }
         }
@@ -33,7 +32,8 @@ pipeline {
         stage('Setup Virtual Environment') {
             steps {
                 sh '''
-                sudo -S python3 -m venv $PERSISTENT_PATH/$VENV_PATH
+                cd $PERSISTENT_PATH
+                sudo -S python3 -m venv $VENV_PATH
                 '''
             }
         }
@@ -41,7 +41,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                sudo -S bash -c 'source $PERSISTENT_PATH/$VENV_PATH/bin/activate && pip install --upgrade pip && pip install -r $PERSISTENT_PATH/requirements.txt'
+                cd $PERSISTENT_PATH
+                sudo -S bash -c 'source $VENV_PATH/bin/activate && pip install --upgrade pip && pip install -r requirements.txt'
                 '''
             }
         }
@@ -49,11 +50,12 @@ pipeline {
         stage('Run Flask App') {
             steps {
                 sh '''
+                cd $PERSISTENT_PATH
                 sudo -u www bash -c '
-                source $PERSISTENT_PATH/$VENV_PATH/bin/activate
-                nohup python $PERSISTENT_PATH/run.py > $PERSISTENT_PATH/flaskapp.log 2>&1 &
+                source $VENV_PATH/bin/activate
+                nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
-                cat $PERSISTENT_PATH/flaskapp.log
+                cat flaskapp.log
                 '
                 '''
             }
@@ -64,7 +66,7 @@ pipeline {
         always {
             script {
                 // 只清理 Jenkins 工作空间，不删除持久化目录中的文件
-                sh 'rm -rf *'
+                sh 'find . -mindepth 1 ! -regex "^./$VENV_PATH.*" -delete'
             }
         }
     }
