@@ -16,6 +16,16 @@ git remote set-url origin https://jieralt@github.com/jieralt/pythonApi.git
 git push origin main
 
 
+
+
+sudo useradd jenkins
+<!-- sudo passwd jenkins -->
+sudo mkdir -p /www/wwwroot/pythonApis
+sudo chown -R jenkins:jenkins /www/wwwroot/pythonApis
+
+sudo chmod -R 755 /www/wwwroot/pythonApis
+
+
 linux
 # 启动 supervisord
 supervisord -c supervisord.conf

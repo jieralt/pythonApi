@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV_PATH = 'venv'
-        PERSISTENT_PATH = '/www/wwwroot/pythonApis'
+        PERSISTENT_PATH = '/www/wwwroot/pythonApis'  // Jenkins 用户有写权限的目录
     }
 
     stages {
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sh '''
                 source $VENV_PATH/bin/activate
-                sudo cp -r . $PERSISTENT_PATH
+                cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
