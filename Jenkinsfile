@@ -8,20 +8,22 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/jieralt/pythonApi.git', branch: 'main'
+                checkout scm
             }
         }
 
         stage('Setup Virtual Environment') {
             steps {
                 sh 'python3 -m venv $VENV_PATH'
-                sh '. $VENV_PATH/bin/activate'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh '. $VENV_PATH/bin/activate && pip install -r requirements.txt'
+                sh '''
+                source $VENV_PATH/bin/activate
+                pip install -r requirements.txt
+                '''
             }
         }
 
@@ -38,7 +40,10 @@ pipeline {
 
         stage('Run Flask App') {
             steps {
-                sh '. $VENV_PATH/bin/activate && nohup python run.py > flaskapp.log 2>&1 &'
+                sh '''
+                source $VENV_PATH/bin/activate
+                nohup python run.py > flaskapp.log 2>&1 &
+                '''
             }
         }
     }
@@ -49,3 +54,4 @@ pipeline {
         }
     }
 }
+1
