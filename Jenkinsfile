@@ -13,34 +13,16 @@ pipeline {
             }
         }
 
-        stage('Setup Virtual Environment') {
-            steps {
-                sh 'python3 -m venv $VENV_PATH'
-            }
-        }
-
-        stage('Install Dependencies') {
+        stage('Clean Target Directory') {
             steps {
                 sh '''
-                source $VENV_PATH/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                echo '' | sudo -S rm -rf $PERSISTENT_PATH
+                echo '' | sudo -S mkdir -p $PERSISTENT_PATH
                 '''
             }
         }
 
-        stage('Check and Stop Existing Flask App') {
-            steps {
-                script {
-                    def pids = sh(script: "ps aux | grep 'python run.py' | grep -v grep | awk '{print \$2}'", returnStdout: true).trim()
-                    if (pids) {
-                        sh "echo '' | sudo -S kill -9 ${pids}"
-                    }
-                }
-            }
-        }
-
-        stage('Copy Files') {
+        stage('Copy Files to Target Directory') {
             steps {
                 sh '''
                 echo '' | sudo -S cp -r . $PERSISTENT_PATH
@@ -48,10 +30,29 @@ pipeline {
             }
         }
 
-        stage('Copy Virtual Environment and Run Flask App') {
+        stage('Setup Virtual Environment') {
             steps {
                 sh '''
-                sudo -S cp -r $VENV_PATH $PERSISTENT_PATH/$VENV_PATH
+                cd $PERSISTENT_PATH
+                python3 -m venv $VENV_PATH
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                cd $PERSISTENT_PATH
+                source $VENV_PATH/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Run Flask App') {
+            steps {
+                sh '''
                 cd $PERSISTENT_PATH
                 sudo -u www bash -c '
                 source $PERSISTENT_PATH/$VENV_PATH/bin/activate
