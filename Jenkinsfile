@@ -45,6 +45,7 @@ pipeline {
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
+                disown
                 '''
             }
         }
