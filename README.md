@@ -30,7 +30,9 @@ sudo visudo
 www ALL=(ALL) NOPASSWD: ALL
 Defaults:www !requiretty
 
-
+sudo chown -R www:www /home/www/.jenkins
+sudo chown -R www:www /www/wwwroot/pythonApis
+sudo chmod -R 775 /www/wwwroot/pythonApis
 
 sudo -u jenkins -i
 echo '' | sudo -S cp -r . /www/wwwroot/pythonApis

@@ -45,9 +45,11 @@ pipeline {
                 source $VENV_PATH/bin/activate
                 echo '' | sudo -S cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
+                sudo -u www bash -c '
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
+                '
                 '''
                 script {
                     def running = sh(script: "netstat -nl | grep ':8001 '", returnStatus: true) == 0
