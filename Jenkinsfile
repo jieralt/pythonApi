@@ -47,6 +47,17 @@ pipeline {
             }
         }
 
+        stage('Stop Existing Flask App') {
+            steps {
+                script {
+                    def pids = sh(script: "sudo lsof -t -i:8001", returnStdout: true).trim()
+                    if (pids) {
+                        sh "echo '' | sudo -S kill -9 ${pids}"
+                    }
+                }
+            }
+        }
+
         stage('Run Flask App') {
             steps {
                 sh '''
