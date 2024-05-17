@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         VENV_PATH = 'venv'
+        PERSISTENT_PATH = '/path/to/persistent/dir'  // 设置一个持久化目录
     }
 
     stages {
@@ -40,14 +41,16 @@ pipeline {
 
         stage('Run Flask App') {
             steps {
+                sh '''
+                source $VENV_PATH/bin/activate
+                cp -r . $PERSISTENT_PATH
+                cd $PERSISTENT_PATH
+                nohup python run.py > flaskapp.log 2>&1 &
+                sleep 5
+                cat flaskapp.log
+                '''
+                // 检查应用是否运行
                 script {
-                    sh '''
-                    source $VENV_PATH/bin/activate
-                    nohup python run.py > flaskapp.log 2>&1 &
-                    sleep 5
-                    cat flaskapp.log
-                    '''
-                    // 检查应用是否运行
                     def running = sh(script: "netstat -nl | grep ':8001 '", returnStatus: true) == 0
                     if (!running) {
                         error "Flask app is not running!"
@@ -59,7 +62,10 @@ pipeline {
 
     post {
         always {
-            cleanWs(notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true)
+            script {
+                // 只清理 Jenkins 工作空间，不删除持久化目录中的文件
+                sh 'rm -rf *'
+            }
         }
     }
 }
