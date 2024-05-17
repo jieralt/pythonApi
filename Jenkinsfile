@@ -33,8 +33,7 @@ pipeline {
         stage('Setup Virtual Environment') {
             steps {
                 sh '''
-                cd $PERSISTENT_PATH
-                python3 -m venv $VENV_PATH
+                sudo -S python3 -m venv $PERSISTENT_PATH/$VENV_PATH
                 '''
             }
         }
@@ -42,10 +41,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                cd $PERSISTENT_PATH
-                source $VENV_PATH/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                sudo -S bash -c 'source $PERSISTENT_PATH/$VENV_PATH/bin/activate && pip install --upgrade pip && pip install -r $PERSISTENT_PATH/requirements.txt'
                 '''
             }
         }
@@ -53,12 +49,11 @@ pipeline {
         stage('Run Flask App') {
             steps {
                 sh '''
-                cd $PERSISTENT_PATH
                 sudo -u www bash -c '
                 source $PERSISTENT_PATH/$VENV_PATH/bin/activate
-                nohup python run.py > flaskapp.log 2>&1 &
+                nohup python $PERSISTENT_PATH/run.py > $PERSISTENT_PATH/flaskapp.log 2>&1 &
                 sleep 5
-                cat flaskapp.log
+                cat $PERSISTENT_PATH/flaskapp.log
                 '
                 '''
             }
