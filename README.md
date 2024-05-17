@@ -27,9 +27,9 @@ sudo chmod -R 755 /www/wwwroot/pythonApis
 
 sudo visudo
 <!-- add -->
+www ALL=(ALL) NOPASSWD: ALL
+Defaults:www !requiretty
 
-jenkins ALL=(ALL) NOPASSWD: ALL
-Defaults:jenkins !requiretty
 
 
 sudo -u jenkins -i
