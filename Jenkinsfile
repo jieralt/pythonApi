@@ -33,7 +33,7 @@ pipeline {
                 script {
                     def pids = sh(script: "ps aux | grep 'python run.py' | grep -v grep | awk '{print \$2}'", returnStdout: true).trim()
                     if (pids) {
-                        sh "echo '' | sudo -S kill -9 ${pids}"
+                        sh "sudo -u jenkins -i -- sh -c 'echo '' | sudo -S kill -9 ${pids}'"
                     }
                 }
             }
@@ -42,12 +42,14 @@ pipeline {
         stage('Run Flask App') {
             steps {
                 sh '''
+                sudo -u jenkins -i -- sh -c '
                 source $VENV_PATH/bin/activate
-                echo '' | sudo -S cp -r . $PERSISTENT_PATH
+                echo "" | sudo -S cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
+                '
                 '''
                 script {
                     def running = sh(script: "netstat -nl | grep ':8001 '", returnStatus: true) == 0
