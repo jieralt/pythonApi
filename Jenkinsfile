@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV_PATH = 'venv'
-        PERSISTENT_PATH = '/www/wwwroot/pythonApis'  // Jenkins 用户有写权限的目录
+        PERSISTENT_PATH = '/www/wwwroot/pythonApis'
     }
 
     stages {
@@ -33,7 +33,7 @@ pipeline {
                 script {
                     def pids = sh(script: "ps aux | grep 'python run.py' | grep -v grep | awk '{print \$2}'", returnStdout: true).trim()
                     if (pids) {
-                        sh "kill -9 ${pids}"
+                        sh "sudo kill -9 ${pids}"
                     }
                 }
             }
@@ -45,7 +45,7 @@ pipeline {
                 source $VENV_PATH/bin/activate
                 sudo cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
-                sudo nohup python run.py > flaskapp.log 2>&1 &
+                nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
                 '''
