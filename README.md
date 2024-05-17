@@ -29,6 +29,8 @@ sudo visudo
 <!-- add -->
 
 jenkins ALL=(ALL) NOPASSWD: ALL
+Defaults:jenkins !requiretty
+
 
 sudo -u jenkins -i
 echo '' | sudo -S cp -r . /www/wwwroot/pythonApis
