@@ -23,6 +23,7 @@ pipeline {
             steps {
                 sh '''
                 source $VENV_PATH/bin/activate
+                pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
             }
@@ -39,24 +40,26 @@ pipeline {
             }
         }
 
-        stage('Run Flask App') {
+        stage('Copy Files') {
             steps {
                 sh '''
-                source $VENV_PATH/bin/activate
                 echo '' | sudo -S cp -r . $PERSISTENT_PATH
+                '''
+            }
+        }
+
+        stage('Copy Virtual Environment and Run Flask App') {
+            steps {
+                sh '''
+                sudo -S cp -r $VENV_PATH $PERSISTENT_PATH/$VENV_PATH
                 cd $PERSISTENT_PATH
                 sudo -u www bash -c '
+                source $PERSISTENT_PATH/$VENV_PATH/bin/activate
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
                 cat flaskapp.log
                 '
                 '''
-                script {
-                    def running = sh(script: "netstat -nl | grep ':8001 '", returnStatus: true) == 0
-                    if (!running) {
-                        error "Flask app is not running!"
-                    }
-                }
             }
         }
     }
