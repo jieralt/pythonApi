@@ -43,6 +43,8 @@ pipeline {
                 sh '''
                 source $VENV_PATH/bin/activate
                 nohup python run.py > flaskapp.log 2>&1 &
+                sleep 5
+                cat flaskapp.log
                 '''
             }
         }
@@ -50,7 +52,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            cleanWs(notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true)
         }
     }
 }
