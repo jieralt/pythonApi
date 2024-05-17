@@ -25,6 +25,15 @@ sudo chown -R jenkins:jenkins /www/wwwroot/pythonApis
 
 sudo chmod -R 755 /www/wwwroot/pythonApis
 
+sudo visudo
+<!-- add -->
+
+jenkins ALL=(ALL) NOPASSWD: ALL
+
+sudo -u jenkins -i
+echo '' | sudo -S cp -r . /www/wwwroot/pythonApis
+sudo -i
+
 
 linux
 # 启动 supervisord

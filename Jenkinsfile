@@ -33,7 +33,7 @@ pipeline {
                 script {
                     def pids = sh(script: "ps aux | grep 'python run.py' | grep -v grep | awk '{print \$2}'", returnStdout: true).trim()
                     if (pids) {
-                        sh "sudo kill -9 ${pids}"
+                        sh "echo '' | sudo -S kill -9 ${pids}"
                     }
                 }
             }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sh '''
                 source $VENV_PATH/bin/activate
-                sudo cp -r . $PERSISTENT_PATH
+                echo '' | sudo -S cp -r . $PERSISTENT_PATH
                 cd $PERSISTENT_PATH
                 nohup python run.py > flaskapp.log 2>&1 &
                 sleep 5
