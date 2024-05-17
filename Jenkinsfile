@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV_PATH = 'venv'
-        PERSISTENT_PATH = '/path/to/persistent/dir'  // 设置一个持久化目录
+        PERSISTENT_PATH = '/www/wwwroot/pythonApis'  // 设置一个持久化目录
     }
 
     stages {
