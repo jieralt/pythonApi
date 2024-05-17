@@ -40,13 +40,19 @@ pipeline {
 
         stage('Run Flask App') {
             steps {
-                sh '''
-                source $VENV_PATH/bin/activate
-                nohup python run.py > flaskapp.log 2>&1 &
-                sleep 5
-                cat flaskapp.log
-                disown
-                '''
+                script {
+                    sh '''
+                    source $VENV_PATH/bin/activate
+                    nohup python run.py > flaskapp.log 2>&1 &
+                    sleep 5
+                    cat flaskapp.log
+                    '''
+                    // 检查应用是否运行
+                    def running = sh(script: "netstat -nl | grep ':8001 '", returnStatus: true) == 0
+                    if (!running) {
+                        error "Flask app is not running!"
+                    }
+                }
             }
         }
     }
