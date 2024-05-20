@@ -1,5 +1,9 @@
 # pythonApi
 
+http://<your-domain-or-ip>:<port>/swagger-ui/
+http://127.0.0.1:8001/swagger-ui/
+
+
 python -V
 Python 3.10.6
 
@@ -40,6 +44,11 @@ sudo -i
 
 
 linux
+
+# 清理缓存
+sync; echo 3 > /proc/sys/vm/drop_caches
+
+
 # 启动 supervisord
 supervisord -c supervisord.conf
 
