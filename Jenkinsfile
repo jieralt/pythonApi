@@ -50,9 +50,11 @@ pipeline {
         stage('Stop Existing Flask App') {
             steps {
                 script {
-                    def pids = sh(script: "sudo lsof -t -i:8001", returnStdout: true).trim()
+                    def pids = sh(script: "sudo lsof -t -i:8001 || true", returnStdout: true).trim()
                     if (pids) {
                         sh "echo '' | sudo -S kill -9 ${pids}"
+                    } else {
+                        echo "No process found on port 8001"
                     }
                 }
             }
