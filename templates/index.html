@@ -11,6 +11,16 @@
         .task-item {
             margin-bottom: 10px;
         }
+        .task-content {
+            display: flex;
+            align-items: center;
+        }
+        .task-content input[type="text"] {
+            margin-right: 10px;
+        }
+        .subtasks {
+            margin-left: 20px;
+        }
     </style>
 </head>
 <body>
@@ -25,16 +35,30 @@
     <script>
         let taskIdCounter = 0;
 
-        function createTaskElement(taskId, taskContent = '') {
+        function createTaskElement(taskId, taskContent = '', taskDescription = '', taskCompleted = false) {
             const taskElement = document.createElement('div');
             taskElement.className = 'task-item';
             taskElement.id = `task-${taskId}`;
+
+            const taskContentElement = document.createElement('div');
+            taskContentElement.className = 'task-content';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = taskCompleted;
+            checkbox.className = 'mr-2';
 
             const taskInput = document.createElement('input');
             taskInput.type = 'text';
             taskInput.value = taskContent;
             taskInput.className = 'form-control d-inline-block';
-            taskInput.style.width = '70%';
+            taskInput.style.width = '20%';
+
+            const taskDescriptionInput = document.createElement('input');
+            taskDescriptionInput.type = 'text';
+            taskDescriptionInput.value = taskDescription;
+            taskDescriptionInput.className = 'form-control d-inline-block ml-2';
+            taskDescriptionInput.style.width = '40%';
 
             const addButton = document.createElement('button');
             addButton.className = 'btn btn-success btn-sm ml-2';
@@ -46,14 +70,23 @@
             deleteButton.textContent = '删除';
             deleteButton.onclick = () => deleteTask(taskId);
 
-            taskElement.appendChild(taskInput);
-            taskElement.appendChild(addButton);
-            taskElement.appendChild(deleteButton);
+            const toggleButton = document.createElement('button');
+            toggleButton.className = 'btn btn-info btn-sm ml-2';
+            toggleButton.textContent = '折叠';
+            toggleButton.onclick = () => toggleSubTasks(taskId);
+
+            taskContentElement.appendChild(checkbox);
+            taskContentElement.appendChild(taskInput);
+            taskContentElement.appendChild(taskDescriptionInput);
+            taskContentElement.appendChild(addButton);
+            taskContentElement.appendChild(deleteButton);
+            taskContentElement.appendChild(toggleButton);
 
             const subTaskContainer = document.createElement('div');
-            subTaskContainer.className = 'ml-4';
+            subTaskContainer.className = 'subtasks';
             subTaskContainer.id = `subtasks-${taskId}`;
 
+            taskElement.appendChild(taskContentElement);
             taskElement.appendChild(subTaskContainer);
 
             return taskElement;
@@ -76,6 +109,12 @@
         function deleteTask(taskId) {
             const taskElement = document.getElementById(`task-${taskId}`);
             taskElement.remove();
+        }
+
+        function toggleSubTasks(taskId) {
+            const subTaskContainer = document.getElementById(`subtasks-${taskId}`);
+            const isHidden = subTaskContainer.style.display === 'none';
+            subTaskContainer.style.display = isHidden ? 'block' : 'none';
         }
     </script>
 </body>
