@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>任务树</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
     <style>
         body {
             padding: 20px;
@@ -14,89 +14,98 @@
         .task-content {
             display: flex;
             align-items: center;
+            gap: 10px;
         }
         .task-content input[type="text"] {
             margin-right: 10px;
         }
+        .task-content .task-name {
+            flex: 3;
+        }
+        .task-content .task-desc {
+            flex: 7;
+        }
+        .task-completed {
+            text-decoration: line-through;
+            color: grey;
+        }
         .subtasks {
             margin-left: 20px;
+        }
+        .collapsed .task-button {
+            color: #007bff;
+        }
+        .expanded .task-button {
+            color: #28a745;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>任务树</h2>
-        <div id="taskTree" class="mb-4">
+        <div id="taskTree" class="accordion mb-4">
             <!-- 任务树将在这里生成 -->
         </div>
         <button class="btn btn-primary" onclick="addTask()">添加任务</button>
+        <button class="btn btn-success" onclick="saveTasks()">保存任务</button>
     </div>
 
     <script>
         let taskIdCounter = 0;
+        const tasks = [];
 
         function createTaskElement(taskId, taskContent = '', taskDescription = '', taskCompleted = false) {
             const taskElement = document.createElement('div');
-            taskElement.className = 'task-item';
+            taskElement.className = 'accordion-item';
             taskElement.id = `task-${taskId}`;
 
-            const taskContentElement = document.createElement('div');
-            taskContentElement.className = 'task-content';
+            const taskHeader = document.createElement('h2');
+            taskHeader.className = 'accordion-header';
+            taskHeader.id = `heading-${taskId}`;
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = taskCompleted;
-            checkbox.className = 'mr-2';
+            const taskButton = document.createElement('button');
+            taskButton.className = `accordion-button task-button ${taskCompleted ? 'collapsed' : 'expanded'}`;
+            taskButton.type = 'button';
+            taskButton.setAttribute('data-bs-toggle', 'collapse');
+            taskButton.setAttribute('data-bs-target', `#collapse-${taskId}`);
+            taskButton.setAttribute('aria-expanded', 'true');
+            taskButton.setAttribute('aria-controls', `collapse-${taskId}`);
+            taskButton.innerHTML = `
+                <span>${taskContent || '新任务'}</span>
+            `;
 
-            const taskInput = document.createElement('input');
-            taskInput.type = 'text';
-            taskInput.value = taskContent;
-            taskInput.className = 'form-control d-inline-block';
-            taskInput.style.width = '20%';
+            const taskCollapse = document.createElement('div');
+            taskCollapse.id = `collapse-${taskId}`;
+            taskCollapse.className = 'accordion-collapse collapse show';
+            taskCollapse.setAttribute('aria-labelledby', `heading-${taskId}`);
+            taskCollapse.setAttribute('data-bs-parent', '#taskTree');
 
-            const taskDescriptionInput = document.createElement('input');
-            taskDescriptionInput.type = 'text';
-            taskDescriptionInput.value = taskDescription;
-            taskDescriptionInput.className = 'form-control d-inline-block ml-2';
-            taskDescriptionInput.style.width = '40%';
+            const taskBody = document.createElement('div');
+            taskBody.className = 'accordion-body';
+            taskBody.innerHTML = `
+                <div class="task-content">
+                    <input class="form-check-input" type="checkbox" ${taskCompleted ? 'checked' : ''} id="checkbox-${taskId}" onchange="toggleTaskCompleted(${taskId})">
+                    <input type="text" class="form-control task-name" value="${taskContent}" oninput="updateTaskContent(${taskId}, this.value)">
+                    <input type="text" class="form-control task-desc" value="${taskDescription}" oninput="updateTaskDescription(${taskId}, this.value)">
+                    <button class="btn btn-success btn-sm me-2" onclick="addSubTask(${taskId})">添加子任务</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${taskId})">删除</button>
+                </div>
+                <div class="subtasks" id="subtasks-${taskId}"></div>
+            `;
 
-            const addButton = document.createElement('button');
-            addButton.className = 'btn btn-success btn-sm ml-2';
-            addButton.textContent = '添加子任务';
-            addButton.onclick = () => addSubTask(taskId);
-
-            const deleteButton = document.createElement('button');
-            deleteButton.className = 'btn btn-danger btn-sm ml-2';
-            deleteButton.textContent = '删除';
-            deleteButton.onclick = () => deleteTask(taskId);
-
-            const toggleButton = document.createElement('button');
-            toggleButton.className = 'btn btn-info btn-sm ml-2';
-            toggleButton.textContent = '折叠';
-            toggleButton.onclick = () => toggleSubTasks(taskId);
-
-            taskContentElement.appendChild(checkbox);
-            taskContentElement.appendChild(taskInput);
-            taskContentElement.appendChild(taskDescriptionInput);
-            taskContentElement.appendChild(addButton);
-            taskContentElement.appendChild(deleteButton);
-            taskContentElement.appendChild(toggleButton);
-
-            const subTaskContainer = document.createElement('div');
-            subTaskContainer.className = 'subtasks';
-            subTaskContainer.id = `subtasks-${taskId}`;
-
-            taskElement.appendChild(taskContentElement);
-            taskElement.appendChild(subTaskContainer);
+            taskHeader.appendChild(taskButton);
+            taskCollapse.appendChild(taskBody);
+            taskElement.appendChild(taskHeader);
+            taskElement.appendChild(taskCollapse);
 
             return taskElement;
         }
 
         function addTask() {
             const taskId = taskIdCounter++;
-            const taskTree = document.getElementById('taskTree');
             const taskElement = createTaskElement(taskId);
-            taskTree.appendChild(taskElement);
+            document.getElementById('taskTree').appendChild(taskElement);
+            tasks.push({ id: taskId, content: '', description: '', completed: false, subtasks: [] });
         }
 
         function addSubTask(parentTaskId) {
@@ -104,18 +113,115 @@
             const subTaskContainer = document.getElementById(`subtasks-${parentTaskId}`);
             const taskElement = createTaskElement(taskId);
             subTaskContainer.appendChild(taskElement);
+            const parentTask = tasks.find(task => task.id === parentTaskId);
+            parentTask.subtasks.push({ id: taskId, content: '', description: '', completed: false, subtasks: [] });
         }
 
         function deleteTask(taskId) {
             const taskElement = document.getElementById(`task-${taskId}`);
             taskElement.remove();
+            removeTask(taskId, tasks);
         }
 
-        function toggleSubTasks(taskId) {
-            const subTaskContainer = document.getElementById(`subtasks-${taskId}`);
-            const isHidden = subTaskContainer.style.display === 'none';
-            subTaskContainer.style.display = isHidden ? 'block' : 'none';
+        function removeTask(taskId, taskList) {
+            const index = taskList.findIndex(task => task.id === taskId);
+            if (index !== -1) {
+                taskList.splice(index, 1);
+            } else {
+                taskList.forEach(task => removeTask(taskId, task.subtasks));
+            }
         }
+
+        function toggleTaskCompleted(taskId) {
+            const checkbox = document.getElementById(`checkbox-${taskId}`);
+            const taskElement = document.getElementById(`task-${taskId}`);
+            const taskButton = taskElement.querySelector('.task-button');
+            if (checkbox.checked) {
+                taskButton.classList.remove('expanded');
+                taskButton.classList.add('collapsed');
+                toggleTaskEditable(taskId, false);
+            } else {
+                taskButton.classList.remove('collapsed');
+                taskButton.classList.add('expanded');
+                toggleTaskEditable(taskId, true);
+            }
+            const task = findTask(taskId, tasks);
+            task.completed = checkbox.checked;
+        }
+
+        function toggleTaskEditable(taskId, editable) {
+            const taskElement = document.getElementById(`task-${taskId}`);
+            const inputs = taskElement.querySelectorAll('.task-content input[type="text"]');
+            inputs.forEach(input => input.disabled = !editable);
+        }
+
+        function updateTaskContent(taskId, content) {
+            const task = findTask(taskId, tasks);
+            task.content = content;
+        }
+
+        function updateTaskDescription(taskId, description) {
+            const task = findTask(taskId, tasks);
+            task.description = description;
+        }
+
+        function findTask(taskId, taskList) {
+            for (const task of taskList) {
+                if (task.id === taskId) return task;
+                const subTask = findTask(taskId, task.subtasks);
+                if (subTask) return subTask;
+            }
+            return null;
+        }
+
+        function saveTasks() {
+            fetch('/options/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tasks)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tasks saved successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error saving tasks:', error);
+            });
+        }
+
+        function loadTasks() {
+            fetch('/options/tasks')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(task => {
+                    addLoadedTask(task, null);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading tasks:', error);
+            });
+        }
+
+        function addLoadedTask(task, parentTaskId) {
+            const taskId = taskIdCounter++;
+            const taskElement = createTaskElement(taskId, task.content, task.description, task.completed);
+            if (parentTaskId === null) {
+                document.getElementById('taskTree').appendChild(taskElement);
+                tasks.push({ id: taskId, content: task.content, description: task.description, completed: task.completed, subtasks: task.subtasks });
+            } else {
+                document.getElementById(`subtasks-${parentTaskId}`).appendChild(taskElement);
+                const parentTask = findTask(parentTaskId, tasks);
+                parentTask.subtasks.push({ id: taskId, content: task.content, description: task.description, completed: task.completed, subtasks: task.subtasks });
+            }
+            task.subtasks.forEach(subtask => addLoadedTask(subtask, taskId));
+        }
+
+        window.onload = loadTasks;
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,23 +1,3 @@
-# from flask import Blueprint, request, Flask, jsonify
-
-
-
-# app = Blueprint('main', __name__)
-
-# # @bp.route('/')
-# # def hello():
-# #     return "Hello, World!"
-
-# @app.route('/')
-# def hello():
-#     name = request.args.get('name', 'Guest')
-#     return f"Hello, World! Welcome {name} !!!"
-
-# @app.route('/welcome/<user>')
-# def welcome(user):
-#     return f"Hello, {user}! Welcome to our application!"
-
-
 from flask import Blueprint, jsonify, request
 from flask_restx import Api, Resource, Namespace
 
