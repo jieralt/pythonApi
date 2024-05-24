@@ -2,90 +2,80 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>选项打勾功能</title>
+    <title>任务树</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             padding: 20px;
         }
+        .task-item {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>选择你感兴趣的选项：</h2>
-        <form id="optionsForm" class="mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="option" value="选项1" id="option1">
-                <label class="form-check-label" for="option1">选项1</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="option" value="选项2" id="option2">
-                <label class="form-check-label" for="option2">选项2</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="option" value="选项3" id="option3">
-                <label class="form-check-label" for="option3">选项3</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="option" value="选项4" id="option4">
-                <label class="form-check-label" for="option4">选项4</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="option" value="选项5" id="option5">
-                <label class="form-check-label" for="option5">选项5</label>
-            </div>
-            <button type="button" class="btn btn-primary mt-3" onclick="submitOptions()">提交</button>
-        </form>
-        
-        <h2>你选择的选项：</h2>
-        <ul id="selectedOptions" class="list-group">
-            <!-- 选中的选项将显示在这里 -->
-        </ul>
+        <h2>任务树</h2>
+        <div id="taskTree" class="mb-4">
+            <!-- 任务树将在这里生成 -->
+        </div>
+        <button class="btn btn-primary" onclick="addTask()">添加任务</button>
     </div>
 
     <script>
-        function submitOptions() {
-            var form = document.getElementById('optionsForm');
-            var selectedOptions = [];
-            var checkboxes = form.querySelectorAll('input[name="option"]:checked');
-            checkboxes.forEach(function(checkbox) {
-                selectedOptions.push(checkbox.value);
-            });
+        let taskIdCounter = 0;
 
-            // 显示选中的选项
-            var selectedOptionsList = document.getElementById('selectedOptions');
-            selectedOptionsList.innerHTML = '';
-            selectedOptions.forEach(function(option) {
-                var li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                var span = document.createElement('span');
-                span.textContent = option;
-                var button = document.createElement('button');
-                button.className = 'btn btn-danger btn-sm';
-                button.textContent = '删除';
-                button.onclick = function() {
-                    li.remove();
-                };
-                li.appendChild(span);
-                li.appendChild(button);
-                selectedOptionsList.appendChild(li);
-            });
+        function createTaskElement(taskId, taskContent = '') {
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item';
+            taskElement.id = `task-${taskId}`;
 
-            // 发送数据到服务器
-            fetch('/options/submit-options', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ options: selectedOptions })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            const taskInput = document.createElement('input');
+            taskInput.type = 'text';
+            taskInput.value = taskContent;
+            taskInput.className = 'form-control d-inline-block';
+            taskInput.style.width = '70%';
+
+            const addButton = document.createElement('button');
+            addButton.className = 'btn btn-success btn-sm ml-2';
+            addButton.textContent = '添加子任务';
+            addButton.onclick = () => addSubTask(taskId);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-danger btn-sm ml-2';
+            deleteButton.textContent = '删除';
+            deleteButton.onclick = () => deleteTask(taskId);
+
+            taskElement.appendChild(taskInput);
+            taskElement.appendChild(addButton);
+            taskElement.appendChild(deleteButton);
+
+            const subTaskContainer = document.createElement('div');
+            subTaskContainer.className = 'ml-4';
+            subTaskContainer.id = `subtasks-${taskId}`;
+
+            taskElement.appendChild(subTaskContainer);
+
+            return taskElement;
+        }
+
+        function addTask() {
+            const taskId = taskIdCounter++;
+            const taskTree = document.getElementById('taskTree');
+            const taskElement = createTaskElement(taskId);
+            taskTree.appendChild(taskElement);
+        }
+
+        function addSubTask(parentTaskId) {
+            const taskId = taskIdCounter++;
+            const subTaskContainer = document.getElementById(`subtasks-${parentTaskId}`);
+            const taskElement = createTaskElement(taskId);
+            subTaskContainer.appendChild(taskElement);
+        }
+
+        function deleteTask(taskId) {
+            const taskElement = document.getElementById(`task-${taskId}`);
+            taskElement.remove();
         }
     </script>
 </body>
