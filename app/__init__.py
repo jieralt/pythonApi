@@ -14,8 +14,9 @@ from .options_routes import options_bp
 from .routes import api_bp
 
 def create_app():
-    template_dir = os.path.abspath('templates')
-    app = Flask(__name__, template_folder=template_dir)
+    # template_dir = os.path.abspath('templates')
+    # app = Flask(__name__, template_folder=template_dir)
+    app = Flask(__name__, template_folder='templates')
     # app = Flask(__name__)
     # app = Flask(__name__, static_folder='templates', template_folder='templates')
     # app = Flask(__name__, template_folder='templates')
