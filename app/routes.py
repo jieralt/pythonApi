@@ -18,7 +18,7 @@
 #     return f"Hello, {user}! Welcome to our application!"
 
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from flask_restx import Api, Resource, Namespace
 
 api_bp = Blueprint('api', __name__)
@@ -44,4 +44,13 @@ class WelcomeUser(Resource):
     def get(self, user):
         '''Returns a personalized welcome message'''
         return f"Hello, {user}! Welcome to our application!"
+    
+    
+# @ns.route('/danmaku', methods=['POST'])
+# def receive_danmaku():
+#     data = request.get_json()
+#     danmaku_content = data.get('danmaku')
+#     print(f"Received in Flask: {danmaku_content}")
+#     # 在这里可以处理接收到的弹幕数据，例如将其发送到Unity
+#     return jsonify({"status": "success"}), 200
 
