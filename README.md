@@ -1,4 +1,6 @@
 # pythonApi
+pip install -r "requirements.txt"
+C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Scripts\pip.exe install -r "requirements.txt"
 
 http://<your-domain-or-ip>:<port>/swagger-ui/
 http://127.0.0.1:8001/swagger-ui/
@@ -9,7 +11,7 @@ Python 3.10.6
 
 pip -V
 pip 24.0 from C:\Users\Administrator\AppData\Local\Programs\Python\Python310\lib\site-packages\pip (python 3.10)
-
+C:\Users\Administrator\AppData\Local\Programs\Python\Python312\Lib\site-packages\pip
 
 pip install -r requirements.txt
 
